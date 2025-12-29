@@ -93,7 +93,7 @@ jobs:
         run: |
           echo "RELEASE_TEXT<<EOF" >> $GITHUB_ENV
           for caddy_build in $CADDY_BUILDS; do
-            echo "- $caddy_build: [Source](https://github.com/tolson4/caddy-cloudflare-crowdsec) / \
+            echo "- $caddy_build: [Source](https://github.com/tolson4/caddy-builds) / \
             [GitHub Package](https://ghcr.io/tolson4/$caddy_build)
           done
           echo "EOF" >> $GITHUB_ENV
