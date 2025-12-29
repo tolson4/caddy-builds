@@ -9,6 +9,11 @@ on:
     paths:
       - Dockerfile  # file updated by Dependabot used as reference
 
+# Environment variables available to all jobs and steps in this workflow
+env:
+  CADDY_BUILDS: |  # list of all Caddy Docker custom builds
+    caddy-cloudflare-proxy
+    caddy-cloudflare-crowdsec
 # Jobs to run once the workflow is triggered
 jobs:
   # Job to parse the Caddy version from the reference Dockerfile
@@ -44,7 +49,9 @@ jobs:
 
       - name: Replace Caddy version in all Dockerfiles
         run: |
-          sed -i "s/caddy:[0-9]\+\.[0-9]\+\.[0-9]\+/caddy:${{ needs.metadata.outputs.version }}/g" ./Dockerfile
+          for caddy_build in $CADDY_BUILDS; do
+            sed -i "s/caddy:[0-9]\+\.[0-9]\+\.[0-9]\+/caddy:${{ needs.metadata.outputs.version }}/g" ./$caddy_build/Dockerfile
+          done
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
@@ -56,7 +63,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git add Dockerfile
+          git add ./*/Dockerfile
           if [ "$(git diff HEAD)" ]
           then
             git commit -S -m "Bump Caddy version to v${{ needs.metadata.outputs.version }}."
@@ -85,8 +92,10 @@ jobs:
       - name: Generate release text
         run: |
           echo "RELEASE_TEXT<<EOF" >> $GITHUB_ENV
-          echo "- $caddy_build: [Source](https://github.com/tolson4/caddy-cloudflare-crowdsec) / \
-          [GitHub Package](https://ghcr.io/tolson4/$caddy_build)
+          for caddy_build in $CADDY_BUILDS; do
+            echo "- $caddy_build: [Source](https://github.com/tolson4/caddy-cloudflare-crowdsec) / \
+            [GitHub Package](https://ghcr.io/tolson4/$caddy_build)
+          done
           echo "EOF" >> $GITHUB_ENV
 
       - name: Push release to github repository
