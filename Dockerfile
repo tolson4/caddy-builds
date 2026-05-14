@@ -1,2 +1,2 @@
-FROM caddy:2.10.2
+FROM caddy:2.11.3
 CMD ["caddy"]
